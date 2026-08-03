@@ -5,7 +5,7 @@ Personal Android app for logging food, tracking weight, and getting unsolicited 
 ## What it does
 
 - **Barcode scanning** — point camera at a product, get nutritional info from Open Food Facts
-- **Manual food log** — add/skip/delete entries, see daily macro totals on gauges
+- **Manual food log** — add/edit/delete entries, grouped by meal, with daily macro totals on gauges
 - **Weight tracking** — log weight, view progress over time
 - **Coach** — after you log something questionable, Gemini judges you via notification
 
@@ -76,8 +76,7 @@ flowchart LR
 
 ## What's rough
 
-- **OCR food recognition** via Google Vision is unreliable — don't trust it
-- **No meal grouping** — entries are a flat list per day
+- **Photo food recognition** via Gemini is an estimate — don't treat it as exact nutrition data
 - **Coach occasionally tells you to eat a salad while you're eating pizza** — it's AI, not a nutritionist
 - **Single user, single device** — no accounts, no sync
 - **No tests for the ViewModels** — architecture tests exist but business logic is untested
@@ -96,4 +95,4 @@ git config core.hooksPath .githooks
 
 ## Tech
 
-Kotlin 2.1, Jetpack Compose, Room, Retrofit + Kotlinx Serialization, Koin, WorkManager, CameraX, ML Kit.
+Kotlin 2.1, Jetpack Compose, Room, Retrofit + Kotlinx Serialization, Koin, WorkManager, CameraX, ML Kit, TensorFlow Lite, and Gemini.

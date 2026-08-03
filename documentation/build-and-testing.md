@@ -69,7 +69,7 @@ The AI pipeline would benefit from these additional tests:
 - Missing model asset behavior
 - Missing vocabulary behavior
 - Model output probability conversion
-- Threshold behavior at 0.74, 0.75, and 0.76
+- Threshold behavior at 0.48, 0.49, and 0.50
 - Gemini JSON parsing
 - Invalid Gemini response handling
 - WorkManager retry behavior

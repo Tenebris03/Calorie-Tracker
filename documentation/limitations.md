@@ -6,7 +6,7 @@ The DistilBERT training dataset is small and manually created. The model may mem
 
 The local model is a gatekeeper, not a nutritional expert. Its class labels are project-specific and should not be interpreted as medical recommendations.
 
-The float16 model is approximately 128 MB. This is acceptable for a demonstration but large compared with a typical lightweight mobile model.
+The float32 model is approximately 255 MB and produces an APK of approximately 575 MB. This is acceptable for a demonstration but large compared with a typical lightweight mobile model.
 
 ## Gemini Limitations
 

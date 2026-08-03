@@ -202,7 +202,7 @@ Gemini remains cloud-based. Only entries that pass the local gatekeeper are sent
 
 ### `food_problem_detector.tflite` cannot be downloaded
 
-This means the conversion cell did not create the output file. Check the conversion output and verify that `tflite_out/model_float16.tflite` exists.
+This means the conversion cell did not create the output file. Check the conversion output and verify that `tflite_out/model_float32.tflite` exists.
 
 ### `tflite_out` does not exist
 
