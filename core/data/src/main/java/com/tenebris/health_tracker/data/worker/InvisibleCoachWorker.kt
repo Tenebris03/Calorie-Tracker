@@ -1,6 +1,7 @@
 package com.tenebris.health_tracker.data.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.tenebris.health_tracker.data.model.CoachResult
@@ -38,7 +39,9 @@ class InvisibleCoachWorker(
                 //     return@withContext Result.success()
                 // }
 
-                val apiKey = encryptedStorage.getApiKey() ?: return@withContext Result.success()
+                val apiKey = encryptedStorage.getApiKey()
+                Log.d(TAG, "Worker started; apiKeyPresent=${!apiKey.isNullOrBlank()}")
+                if (apiKey.isNullOrBlank()) return@withContext Result.success()
 
                 val deviceLocation = locationProvider.getLastKnownLocation()
 
@@ -46,13 +49,16 @@ class InvisibleCoachWorker(
 
                 when (result) {
                     is CoachResult.AuthError -> {
+                        Log.w(TAG, "Gemini returned an authentication error")
                         userPrefs.setCoachApiKeyValid(false)
                     }
                     is CoachResult.RateLimited -> {
+                        Log.w(TAG, "Gemini rate limited the request")
                         return@withContext Result.retry()
                     }
                     is CoachResult.Success -> {
                         val response = result.response
+                        Log.d(TAG, "Gemini completed; criticalAlert=${response.criticalAlert}")
                         if (response.criticalAlert) {
                             userPrefs.saveCoachResponse(response.reasonHeadline, response.reasonBody)
                             userPrefs.saveCoachInterventionTimestamp()
@@ -64,6 +70,7 @@ class InvisibleCoachWorker(
                         }
                     }
                     is CoachResult.OtherError -> {
+                        Log.w(TAG, "Gemini returned an unclassified error")
                         // Silent fail
                     }
                 }
@@ -75,6 +82,7 @@ class InvisibleCoachWorker(
         }
 
     companion object {
+        private const val TAG = "InvisibleCoachWorker"
         const val KEY_MEAL_LOG = "MEAL_LOG"
         const val KEY_REMAINING_CALORIES = "REMAINING_CALORIES"
     }

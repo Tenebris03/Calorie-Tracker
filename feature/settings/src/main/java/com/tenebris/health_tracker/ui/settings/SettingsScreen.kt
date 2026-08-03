@@ -2,7 +2,6 @@ package com.tenebris.health_tracker.ui.settings
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -35,26 +34,6 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     var height by remember(state.height) { mutableStateOf(state.height.toString()) }
     var targetWeightInput by remember(state.targetWeight) { mutableStateOf(state.targetWeight.toString()) }
     var apiKeyInput by remember(apiKey) { mutableStateOf(apiKey) }
-
-    val exportLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.CreateDocument("application/octet-stream"),
-        ) { uri: Uri? ->
-            uri?.let {
-                val outputStream = context.contentResolver.openOutputStream(it)
-                viewModel.exportData(context, outputStream)
-            }
-        }
-
-    val importLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.GetContent(),
-        ) { uri: Uri? ->
-            uri?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                viewModel.importData(context, inputStream)
-            }
-        }
 
     var hasLocationPerm by remember { mutableStateOf(false) }
     var hasCalendarPerm by remember { mutableStateOf(false) }
@@ -207,42 +186,6 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                     contentColor = MaterialTheme.colorScheme.onTertiary,
                 ) {
                     Text("Save changes")
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            "Backup & Restore",
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ExpressiveCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    "You can backup your data directly to Google Drive by selecting it as the destination in the file picker.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                ExpressiveButton(
-                    onClick = { exportLauncher.launch("health_tracker_backup.db") },
-                    modifier = Modifier.fillMaxWidth(),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                ) {
-                    Text("Export data")
-                }
-
-                OutlinedButton(
-                    onClick = { importLauncher.launch("*/*") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CircleShape,
-                ) {
-                    Text("Import data", color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }

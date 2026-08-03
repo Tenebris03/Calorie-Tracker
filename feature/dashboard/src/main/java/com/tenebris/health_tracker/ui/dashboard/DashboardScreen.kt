@@ -608,17 +608,23 @@ fun AddFoodSheetContent(
     var baseFiber by remember { mutableStateOf(0) }
 
     LaunchedEffect(scannerState) {
-        if (scannerState is ScannerState.Success) {
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            name = scannerState.name
-            baseCalories = scannerState.calories100g
-            baseProtein = scannerState.protein100g
-            baseFat = scannerState.fat100g
-            baseCarbs = scannerState.carbohydrates100g
-            baseFiber = scannerState.fiber100g
-            weightInput = scannerState.estimatedWeightGrams.toString()
-            showNutrition = true
-            showScanner = false
+        when (scannerState) {
+            is ScannerState.Success -> {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                name = scannerState.name
+                baseCalories = scannerState.calories100g
+                baseProtein = scannerState.protein100g
+                baseFat = scannerState.fat100g
+                baseCarbs = scannerState.carbohydrates100g
+                baseFiber = scannerState.fiber100g
+                weightInput = scannerState.estimatedWeightGrams.toString()
+                showNutrition = true
+                showScanner = false
+            }
+            is ScannerState.Error -> {
+                showScanner = false
+            }
+            else -> Unit
         }
     }
 

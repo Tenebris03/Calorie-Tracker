@@ -1,6 +1,5 @@
 package com.tenebris.health_tracker.ui.settings
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tenebris.health_tracker.data.local.ProfileDao
@@ -10,8 +9,6 @@ import com.tenebris.health_tracker.data.pref.EncryptedStorageManager
 import com.tenebris.health_tracker.data.pref.UserPreferences
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.InputStream
-import java.io.OutputStream
 
 data class SettingsState(
     val bmr: Int = 2000,
@@ -127,36 +124,6 @@ class SettingsViewModel(
         encryptedStorage.clearApiKey()
         viewModelScope.launch {
             userPreferences.setCoachApiKeyValid(false)
-        }
-    }
-
-    fun exportData(
-        context: Context,
-        outputStream: OutputStream?,
-    ) {
-        viewModelScope.launch {
-            outputStream?.use { output ->
-                val dbFile = context.getDatabasePath("health_tracker_db")
-                if (dbFile.exists()) {
-                    dbFile.inputStream().use { input ->
-                        input.copyTo(output)
-                    }
-                }
-            }
-        }
-    }
-
-    fun importData(
-        context: Context,
-        inputStream: InputStream?,
-    ) {
-        viewModelScope.launch {
-            inputStream?.use { input ->
-                val dbFile = context.getDatabasePath("health_tracker_db")
-                dbFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
         }
     }
 

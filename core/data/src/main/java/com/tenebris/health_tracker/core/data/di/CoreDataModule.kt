@@ -1,5 +1,6 @@
 package com.tenebris.health_tracker.core.data.di
 
+import androidx.work.WorkManager
 import com.google.ai.client.generativeai.GenerativeModel
 import com.tenebris.health_tracker.core.data.BuildConfig
 import com.tenebris.health_tracker.data.Constants
@@ -22,7 +23,6 @@ import com.tenebris.health_tracker.data.service.CalendarContextResolver
 import com.tenebris.health_tracker.data.service.CalorieCalculator
 import com.tenebris.health_tracker.data.service.DistilBertFoodClassifier
 import com.tenebris.health_tracker.data.service.FoodProblemDetector
-import com.tenebris.health_tracker.data.service.HeuristicFoodProblemDetector
 import com.tenebris.health_tracker.data.service.LocationProvider
 import com.tenebris.health_tracker.data.service.TestDataSeeder
 import com.tenebris.health_tracker.data.service.TrendAnalyzer
@@ -31,7 +31,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import androidx.work.WorkManager
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -80,7 +79,7 @@ val coreDataModule =
 
         // Services
         single { FoodGatekeeper() }
-        single<FoodProblemDetector> { DistilBertFoodClassifier(HeuristicFoodProblemDetector()) }
+        single<FoodProblemDetector> { DistilBertFoodClassifier(androidApplication()) }
 
         single {
             val encryptedStorage: EncryptedStorageManager = get()

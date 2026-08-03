@@ -1,6 +1,7 @@
 package com.tenebris.health_tracker.ui.dashboard
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
@@ -21,6 +22,7 @@ import com.tenebris.health_tracker.data.repository.WeightRepository
 import com.tenebris.health_tracker.data.service.CalorieCalculator
 import com.tenebris.health_tracker.data.service.CalorieTargets
 import com.tenebris.health_tracker.data.service.FoodProblemDetector
+import com.tenebris.health_tracker.data.service.FoodContext
 import com.tenebris.health_tracker.data.worker.InvisibleCoachWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,6 +41,7 @@ data class DashboardState(
     val totalFiber: Int = 0,
     val targetCalories: Int = 2000,
     val targetProtein: Int = 150,
+    val goal: String = "Maintain",
     val currentWeight: Float = 70f,
     val recentEntries: List<FoodEntry> = emptyList(),
 )
@@ -46,6 +49,7 @@ data class DashboardState(
 private data class TargetsWithWeight(
     val targets: CalorieTargets,
     val weightKg: Float,
+    val goal: String,
 )
 
 @Stable
@@ -146,8 +150,8 @@ class DashboardViewModel(
                         activityLevel = activityLevel,
                         proteinTarget = proteinTarget,
                     )
-                    TargetsWithWeight(targets, weightVal)
-                }.flatMapLatest { (targets, weightVal) ->
+                    TargetsWithWeight(targets, weightVal, goal)
+                }.flatMapLatest { (targets, weightVal, goal) ->
                     combine(
                         repository.getEntriesByDate(date),
                         repository.getUniqueRecentEntries(),
@@ -162,6 +166,7 @@ class DashboardViewModel(
                             totalFiber = entries.sumOf { it.fiber },
                             targetCalories = targets.adjustedTarget,
                             targetProtein = targets.proteinTarget,
+                            goal = goal,
                             currentWeight = weightVal,
                             recentEntries = recent,
                         )
@@ -200,9 +205,33 @@ class DashboardViewModel(
                 java.time.LocalTime
                     .now()
                     .hour
-            if (foodProblemDetector.isProblematic(name, kcal, hour)) {
-                val remaining = state.value.targetCalories - state.value.totalCalories - kcal
-                triggerCoach("$name: ${kcal}kcal, ${protein}g protein", remaining)
+            val currentState = state.value
+            val remaining = currentState.targetCalories - currentState.totalCalories - kcal
+            val risk =
+                foodProblemDetector.evaluate(
+                    FoodContext(
+                        foodName = name,
+                        calories = kcal,
+                        protein = protein,
+                        fat = fat,
+                        carbohydrates = carbs,
+                        fiber = fiber,
+                        hour = hour,
+                        remainingCalories = remaining,
+                        calorieTarget = currentState.targetCalories,
+                        goal = currentState.goal,
+                    ),
+                )
+            if (risk.shouldEvaluate) {
+                Log.d("CoachGate", "Local model accepted food for coach evaluation")
+                triggerCoach(
+                    "Food: $name. Calories: ${kcal}cal. Protein: ${protein}g. Fat: ${fat}g. " +
+                        "Carbohydrates: ${carbs}g. Fiber: ${fiber}g. Goal: ${currentState.goal}. " +
+                        "Daily target: ${currentState.targetCalories}cal.",
+                    remaining,
+                )
+            } else {
+                Log.d("CoachGate", "Local model filtered food before coach evaluation")
             }
         }
     }
@@ -244,7 +273,7 @@ class DashboardViewModel(
     }
 
     fun onBarcodeScanned(barcode: String) {
-        if (_scannerState.value is ScannerState.Loading || _scannerState.value is ScannerState.Success) return
+        if (_scannerState.value !is ScannerState.Idle) return
 
         _scannerState.value = ScannerState.Loading
         viewModelScope.launch {

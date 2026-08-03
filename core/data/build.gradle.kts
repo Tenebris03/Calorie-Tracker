@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("com.google.devtools.ksp")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -19,6 +20,10 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    androidResources {
+        noCompress += "tflite"
     }
 
     lint {
@@ -57,6 +62,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.generativeai)
+    implementation(libs.tensorflow.lite)
 
     // DataStore
     implementation(libs.datastore.preferences)

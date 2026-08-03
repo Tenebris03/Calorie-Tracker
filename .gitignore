@@ -16,3 +16,6 @@
 .cxx
 local.properties
 /.idea/kotlinc.xml
+# Downloaded ML assets are distributed separately because the TFLite model is over 100 MB.
+/core/data/src/main/assets/food_problem_detector.tflite
+/core/data/src/main/assets/vocab.txt
